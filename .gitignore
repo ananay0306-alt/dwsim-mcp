@@ -1,0 +1,13 @@
+# generated assembly workspace (rebuilt by setup.sh)
+lib/
+
+# server logs
+logs/
+
+# build intermediates
+*.rsp
+*.exe
+*.dll
+
+# macOS
+.DS_Store
