@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """Build dwsim-mcp against the installed DWSIM.app assemblies.
 
-Multi-file evolution of automation/prepare.py, same three proven constraints:
-compile with mono's csc (arm64; IL is portable), run on the x64 .NET 8 runtime
-(natives are x86_64), and emit a deps.json so the local Microsoft.VisualBasic
-shim (10.9.0.0) beats the framework facade.
-
-Output lands in the automation lib workspace, where the assemblies, native
-aliases, and overrides already live.
+Compiles src/ into lib/ alongside the DWSIM assemblies (workspace built by
+setup.sh). Three constraints shape this: compile with mono's csc (arm64; IL
+is portable), run on the x64 .NET 8 runtime (DWSIM's natives are x86_64),
+and emit a deps.json so the local Microsoft.VisualBasic shim (10.9.0.0)
+beats the framework facade.
 """
 import glob, json, os, re, subprocess, sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
-LIB = os.environ.get("DWSIM_MCP_LIB", os.path.join(ROOT, "lib"))
+LIB = os.path.join(ROOT, "lib")
 NAME = "dwsim-mcp"
 
 FRAMEWORK_RE = re.compile(

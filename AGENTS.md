@@ -47,7 +47,7 @@ Troubleshooting map:
 | `run_script` compile errors about csc | non-standard mono | set `DWSIM_MCP_CSC=/path/to/csc` |
 
 Environment overrides (rarely needed): `DWSIM_APP`, `DWSIM_MCP_DOTNET`,
-`DWSIM_MCP_CSC`, `DWSIM_MCP_LIB`.
+`DWSIM_MCP_CSC`.
 
 ---
 

@@ -17,8 +17,15 @@ MB="$DWSIM_APP/Contents/MonoBundle"
 DOTNET_DIR="${DWSIM_MCP_DOTNET:-$HOME/.dotnet-x64}"
 LIB="$ROOT/lib"
 
-step() { print -P "%F{blue}==>%f $1"; }
-die()  { print -P "%F{red}ERROR:%f $1" >&2; exit 1; }
+step() { printf '==> %s\n' "$1"; }
+die()  { printf 'ERROR: %s\n' "$1" >&2; exit 1; }
+
+# Apple Silicon needs Rosetta to run the x64 runtime DWSIM's natives require.
+if [ "$(uname -m)" = "arm64" ] && ! /usr/bin/pgrep -q oahd; then
+  die "Rosetta 2 is required on Apple Silicon. Install it with:
+  softwareupdate --install-rosetta --agree-to-license
+then re-run this script."
+fi
 
 # ---- 1. DWSIM.app ----------------------------------------------------------
 step "checking DWSIM.app"
@@ -51,7 +58,8 @@ step "checking x64 .NET 8 runtime"
 if [ ! -x "$DOTNET_DIR/dotnet" ]; then
   step "installing x64 .NET 8 runtime into $DOTNET_DIR"
   TMP="$(mktemp -d)"
-  curl -sSL https://dot.net/v1/dotnet-install.sh -o "$TMP/dotnet-install.sh"
+  curl -fsSL https://dot.net/v1/dotnet-install.sh -o "$TMP/dotnet-install.sh" \
+    || die "download of dotnet-install.sh failed (network?)"
   chmod +x "$TMP/dotnet-install.sh"
   "$TMP/dotnet-install.sh" --runtime dotnet --channel 8.0 --architecture x64 \
       --install-dir "$DOTNET_DIR"
@@ -91,7 +99,8 @@ done
 step "fetching .NET 8 shim packages from nuget.org"
 TMPN="$(mktemp -d)"
 fetch() { # name version tfm
-  curl -sSL -o "$TMPN/$1.zip" "https://www.nuget.org/api/v2/package/$1/$2"
+  curl -fsSL -o "$TMPN/$1.zip" "https://www.nuget.org/api/v2/package/$1/$2" \
+    || die "download of $1 $2 from nuget.org failed (network?)"
   unzip -o -q "$TMPN/$1.zip" -d "$TMPN/$1"
   rm -f "$LIB/$1.dll"
   cp "$TMPN/$1/lib/$3/$1.dll" "$LIB/"
@@ -168,7 +177,8 @@ cfg = {}
 if os.path.exists(cfg_path):
     shutil.copy(cfg_path, cfg_path + ".backup-before-dwsim-mcp")
     with open(cfg_path) as fh:
-        cfg = json.load(fh)
+        content = fh.read().strip()
+    cfg = json.loads(content) if content else {}
 else:
     os.makedirs(os.path.dirname(cfg_path), exist_ok=True)
 cfg.setdefault("mcpServers", {})["dwsim"] = {"command": os.path.join(root, "dwsim-mcp.sh")}
