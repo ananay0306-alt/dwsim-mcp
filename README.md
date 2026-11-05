@@ -27,7 +27,7 @@ This is that, for anyone.
 ## Install
 
 ```bash
-git clone https://github.com/sharique2004/dwsim-mcp
+git clone https://github.com/ananay0306-alt/dwsim-mcp
 cd dwsim-mcp
 ./setup.sh --register     # builds everything, registers with Claude Desktop
 ```
